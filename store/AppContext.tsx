@@ -317,8 +317,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       UPDATE settings 
       SET name = ${n.name}, address = ${n.address}, tax_identifier = ${n.taxIdentifier}, base_currency = ${n.baseCurrency}, country = ${n.country},
           so_prefix = ${n.soPrefix}, po_prefix = ${n.poPrefix}, inv_prefix = ${n.invPrefix},
-          so_next_number = ${n.soNextNumber}, po_next_number = ${n.poNextNumber}, inv_next_number = ${n.invNextNumber},
-          include_customer_in_po = ${n.includeCustomerInPO}
+          so_next_number = ${n.so_next_number}, po_next_number = ${n.po_next_number}, inv_next_number = ${n.inv_next_number},
+          include_customer_in_po = ${n.include_customer_in_po}
       WHERE id = 1
     `;
     setSettings(n);
