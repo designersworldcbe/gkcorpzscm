@@ -11,7 +11,7 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { setUser, setIsAuthenticated } = useApp();
+  const { login, signup } = useApp();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,23 +19,16 @@ const Auth: React.FC = () => {
     
     try {
       if (view === 'login') {
-        if (email && password.length >= 6) {
-          const mockUser = { id: 'u-' + Date.now(), name: email.split('@')[0], email, role: 'admin' as const };
-          setUser(mockUser);
-          setIsAuthenticated(true);
-          localStorage.setItem('gk_scm_auth', JSON.stringify(mockUser));
-        } else {
-          throw new Error("Invalid credentials or password too short.");
-        }
+        await login(email, password);
       } else if (view === 'signup') {
-        alert("Account request submitted! An administrator will verify your access shortly.");
-        setView('login');
+        await signup(name, email, password);
       } else {
         alert("Recovery instructions sent to " + email);
         setView('login');
       }
     } catch (err: any) {
-      alert(err.message || "Authentication error. Please try again.");
+      console.error(err);
+      alert(err.message || "Authentication error. Check if your Neon tables are created.");
     } finally {
       setLoading(false);
     }
@@ -54,13 +47,6 @@ const Auth: React.FC = () => {
       </div>
 
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 bg-white relative">
-        {!sql && (
-          <div className="absolute top-6 right-6">
-            <span className="px-3 py-1 bg-amber-50 text-amber-600 text-[9px] font-black rounded-lg border border-amber-100 uppercase tracking-widest">
-              Demo Mode / Database Offline
-            </span>
-          </div>
-        )}
         <div className="w-full max-w-md animate-in fade-in slide-in-from-right-4 duration-700">
           <div className="mb-10">
             <h2 className="text-4xl font-black text-slate-900 tracking-tight uppercase">
@@ -88,14 +74,14 @@ const Auth: React.FC = () => {
               </div>
             )}
             <button type="submit" disabled={loading} className="w-full py-5 bg-blue-600 text-white font-black uppercase text-xs tracking-[0.3em] rounded-2xl shadow-xl hover:bg-blue-700 transition-all disabled:opacity-50 mt-4">
-              {loading ? 'Validating...' : view === 'login' ? 'Login' : view === 'signup' ? 'Sign Up' : 'Send Link'}
+              {loading ? 'Authenticating...' : view === 'login' ? 'Login' : view === 'signup' ? 'Sign Up' : 'Send Link'}
             </button>
           </form>
           <div className="mt-12 text-center">
             {view === 'login' ? (
               <button onClick={() => setView('signup')} className="w-full py-5 text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] border-2 border-slate-100 rounded-2xl hover:bg-slate-50 transition-all">Create Account</button>
             ) : (
-              <button onClick={() => setView('login')} className="text-[11px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-[0.2em]">← Back</button>
+              <button onClick={() => setView('login')} className="text-[11px] font-black text-slate-400 hover:text-blue-600 uppercase tracking-[0.2em]">← Back to Login</button>
             )}
           </div>
         </div>
