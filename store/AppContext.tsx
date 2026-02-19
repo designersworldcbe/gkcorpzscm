@@ -72,20 +72,34 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const login = async (email: string, pass: string) => {
-    const results = await sql`SELECT * FROM users WHERE email = ${email} AND password = ${pass} LIMIT 1`;
-    if (results.length > 0) {
-      const u = { id: results[0].id.toString(), name: results[0].name, email: results[0].email, role: results[0].role };
-      setUser(u);
-      setIsAuthenticated(true);
-      localStorage.setItem('gk_scm_auth', JSON.stringify(u));
-    } else {
-      throw new Error("Invalid credentials");
+    try {
+      const results = await sql`SELECT * FROM users WHERE email = ${email} AND password = ${pass} LIMIT 1`;
+      if (results.length > 0) {
+        const u = { id: results[0].id.toString(), name: results[0].name, email: results[0].email, role: results[0].role };
+        setUser(u);
+        setIsAuthenticated(true);
+        localStorage.setItem('gk_scm_auth', JSON.stringify(u));
+      } else {
+        throw new Error("Invalid email or password.");
+      }
+    } catch (err: any) {
+      if (err.message.includes('does not exist')) {
+        throw new Error("Database tables not found. Please run the SQL migration script in your Neon Console.");
+      }
+      throw err;
     }
   };
 
   const signup = async (name: string, email: string, pass: string) => {
-    await sql`INSERT INTO users (name, email, password, role) VALUES (${name}, ${email}, ${pass}, 'admin')`;
-    await login(email, pass);
+    try {
+      await sql`INSERT INTO users (name, email, password, role) VALUES (${name}, ${email}, ${pass}, 'admin')`;
+      await login(email, pass);
+    } catch (err: any) {
+      if (err.message.includes('does not exist')) {
+        throw new Error("Database tables not found. Please run the SQL migration script in your Neon Console.");
+      }
+      throw err;
+    }
   };
 
   const refreshData = async () => {
@@ -109,7 +123,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setSettings(st[0]);
       setProcesses(pr as any);
     } catch (e) {
-      console.error("Data refresh failed", e);
+      console.error("Data refresh failed:", e);
     }
   };
 
@@ -137,7 +151,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const so = salesOrders.find(o => o.id === soId);
     if (!so) return;
 
-    // Logic: Group Sales Order items by their primary supplier
     const supplierGroups: Record<string, any[]> = {};
     so.items.forEach(item => {
       const part = parts.find(p => p.id === (item.partId as any));
@@ -188,7 +201,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     await refreshData();
   };
 
-  // Stubs for other operations
   const updateSettings = async (u: any) => { await sql`UPDATE settings SET name=${u.name}, address=${u.address} WHERE id=1`; setSettings({...settings, ...u}); };
   const updateSalesOrder = async () => {};
   const deleteSalesOrder = async (id: string) => { await sql`DELETE FROM sales_orders WHERE id=${id}`; await refreshData(); };
