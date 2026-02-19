@@ -62,7 +62,7 @@ const Auth: React.FC = () => {
             <p className="text-[10px] font-black text-slate-800 uppercase mb-2">Instructions:</p>
             <p className="text-[9px] font-bold text-slate-500 leading-normal uppercase">
               1. Open your Neon Console.<br/>
-              2. Go to Dashboard > Connection Details.<br/>
+              2. Go to Dashboard &gt; Connection Details.<br/>
               3. Copy the Connection String.<br/>
               4. Add it as 'DATABASE_URL' in your Netlify environment variables.
             </p>
